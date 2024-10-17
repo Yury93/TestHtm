@@ -1,123 +1,134 @@
 <!DOCTYPE html>
 <html lang="en-us">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity WebGL Player | BlockBreaker</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-    <style>
-        body {
-            overflow: hidden;
-        }
-    </style>
+    <link rel="stylesheet" href="TemplateData/preloader.css">
 </head>
+
 <body>
-    <div id="unity-container" style="position: absolute; width: 100%; height: 100%; left: 0%; top: 0%;">
-        <canvas id="unity-canvas" style="position: absolute; width: 100%; height: 100%;"></canvas>
-        <div id="unity-loading-bar">
-            <div id="unity-logo"></div>
-            <div id="unity-progress-bar-empty">
-                <div id="unity-progress-bar-full"></div>
+
+    <!-- Прелоадер -->
+    <div class="preloader">
+        <div class="preloader__bar-container">
+            <div class="preloader__bar"></div>
+            <div class="preloader__bar"></div>
+            <div class="preloader__bar"></div>
+            <div class="preloader__bar"></div>
+            <div class="preloader__bar"></div>
+            <div class="preloader__bar"></div>
+            <!-- <div class="preloader__bar"></div>
+            <div class="preloader__bar"></div>
+            <div class="preloader__bar"></div>
+            <div class="preloader__bar"></div>
+            <div class="preloader__bar"></div>
+            <div class="preloader__bar"></div>
+            <div class="preloader__bar"></div>
+            <div class="preloader__bar"></div> -->
+        </div>
+        <div class="wrapper">
+            <h1 class="title">Welcome To <span id="word">CopArcadia!</span></h1>
+            <img src="TemplateData/girl.png" alt="hero" class="hero-img">
+
+            <div class="loader">
+                <div class="box"></div>
+                <div class="box"></div>
+                <div class="box"></div>
+                <div class="box"></div>
+                <div class="box"></div>
             </div>
         </div>
-        <div id="unity-warning"> </div>
-       
+        <!-- <img src="img/Bitcoin-1.svg" alt="crypto-coin" class="crypto-img">
+        <img src="img/Etherium-1.svg" alt="crypto-coin" class="crypto-img">
+        <img src="img/Monero-2.svg" alt="crypto-coin" class="crypto-img">
+        <img src="img/LiteCoin-3.svg" alt="crypto-coin" class="crypto-img">
+        <img src="img/Etherium-3.svg" alt="crypto-coin" class="crypto-img"> -->
     </div>
+    <!-- Unity канвас -->
+    <div id="unity-container" style="position: absolute; width: 100%; height: 100%; left: 0%; top: 0%;">
+        <canvas id="unity-canvas" style="position: absolute; width: 100%; height: 100%;"></canvas>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script>
+        // Устанавливаем начальные параметры для прелоадера и канваса
+        const tloader = gsap.timeline();
 
-        var container = document.querySelector("#unity-container");
-        var canvas = document.querySelector("#unity-canvas");
-        var loadingBar = document.querySelector("#unity-loading-bar");
-        var progressBarFull = document.querySelector("#unity-progress-bar-full");
-        var fullscreenButton = document.querySelector("#unity-fullscreen-button");
-        var warningBanner = document.querySelector("#unity-warning");
-
-        // Shows a temporary message banner/ribbon for a few seconds, or
-        // a permanent error message on top of the canvas if type=='error'.
-        // If type=='warning', a yellow highlight color is used.
-        // Modify or remove this function to customize the visually presented
-        // way that non-critical warnings and error messages are presented to the
-        // user.
-        function unityShowBanner(msg, type) {
-            function updateBannerVisibility() {
-                warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-            }
-            var div = document.createElement('div');
-            div.innerHTML = msg;
-            warningBanner.appendChild(div);
-            if (type == 'error') div.style = 'background: red; padding: 10px;';
-            else {
-                if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-                setTimeout(function () {
-                    warningBanner.removeChild(div);
-                    updateBannerVisibility();
-                }, 5000);
-            }
-            updateBannerVisibility();
-        }
-
-        var buildUrl = "Build";
-        var loaderUrl = buildUrl + "/BlockBreaker.loader.js";
-        var config = {
-            dataUrl: buildUrl + "/BlockBreaker.data.unityweb",
-            frameworkUrl: buildUrl + "/BlockBreaker.framework.js.unityweb",
-            codeUrl: buildUrl + "/BlockBreaker.wasm.unityweb",
-            streamingAssetsUrl: "StreamingAssets",
-            companyName: "DefaultCompany",
-            productName: "BlockBreaker",
-            productVersion: "1.0",
-            showBanner: unityShowBanner,
-        };
-
-        // By default, Unity keeps WebGL canvas render target size matched with
-        // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-        // Set this to false if you want to decouple this synchronization from
-        // happening inside the engine, and you would instead like to size up
-        // the canvas DOM size and WebGL render target sizes yourself.
-        // config.matchWebGLToCanvasSize = false;
-
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-            // Mobile device style: fill the whole browser client area with the game canvas:
-
-            var meta = document.createElement('meta');
-            meta.name = 'viewport';
-            meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-            document.getElementsByTagName('head')[0].appendChild(meta);
-            container.className = "unity-mobile";
-            canvas.className = "unity-mobile";
-
-            // To lower canvas resolution on mobile devices to gain some
-            // performance, uncomment the following line:
-            // config.devicePixelRatio = 1;
-
-
-        } else {
-            // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-
-            canvas.style.width = "100%";
-            canvas.style.height = "100%";
-        }
-
-        loadingBar.style.display = "block";
-
-        var script = document.createElement("script");
-        script.src = loaderUrl;
-        script.onload = () => {
-            createUnityInstance(canvas, config, (progress) => {
-                progressBarFull.style.width = 100 * progress + "%";
-            }).then((unityInstance) => {
-                loadingBar.style.display = "none";
-                fullscreenButton.onclick = () => {
-                    unityInstance.SetFullscreen(1);
-                };
-            }).catch((message) => {
-                alert(message);
+        // Основная анимация для прелоадера
+        tloader
+            .set('.wrapper', { opacity: 0 }) // Прелоадер также скрыт
+            .to('.wrapper', { opacity: 1, duration: 0.5 }) // Плавное появление прелоадера
+            .to('.preloader__bar', {
+                yPercent: 0, // Появление полосок прелоадера
+                duration: 0.5,
+                stagger: 0.2
+            })
+            .to('.wrapper', {opacity: 0})
+            .to('.preloader__bar', {
+                yPercent: -100, // Убираем полоски прелоадера вверх
+                duration: 0.3,
+                stagger: 0.15,
+                // borderBottomLeftRadius: 100,
+                // borderBottomRightRadius: 100,
+            })
+            .call(() => {
+                // После завершения анимации полосок, запускаем появление канваса
+                gsap.to('#unity-container', { opacity: 1, duration: 1.5 });
             });
-        };
 
-        document.body.appendChild(script);
 
+        // Функция для загрузки Unity и плавного появления канваса
+        function startUnityLoading() {
+            var container = document.querySelector("#unity-container");
+            var canvas = document.querySelector("#unity-canvas");
+            var preloader = document.querySelector(".preloader");
+            container.style.opacity = '0'; // Начальное значение прозрачности контейнера
+
+            var buildUrl = "Build";
+            var loaderUrl = buildUrl + "/BlockBreaker.loader.js";
+            var config = {
+                dataUrl: buildUrl + "/BlockBreaker.data.unityweb",
+                frameworkUrl: buildUrl + "/BlockBreaker.framework.js.unityweb",
+                codeUrl: buildUrl + "/BlockBreaker.wasm.unityweb",
+                streamingAssetsUrl: "StreamingAssets",
+                companyName: "DefaultCompany",
+                productName: "BlockBreaker",
+                productVersion: "1.0",
+            };
+
+            if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                var meta = document.createElement('meta');
+                meta.name = 'viewport';
+                meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+                document.getElementsByTagName('head')[0].appendChild(meta);
+                container.className = "unity-mobile";
+                canvas.className = "unity-mobile";
+            } else {
+                canvas.style.width = "100%";
+                canvas.style.height = "100%";
+            }
+
+            // Загружаем Unity WebGL
+            var script = document.createElement("script");
+            script.src = loaderUrl;
+            script.onload = () => {
+                createUnityInstance(canvas, config, (progress) => {
+                    console.log(`Progress: ${progress * 100}%`);
+                }).catch((message) => {
+                    alert(message);
+                });
+            };
+
+            document.body.appendChild(script);
+        }
+
+        startUnityLoading();
     </script>
+
 </body>
+
 </html>
