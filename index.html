@@ -32,7 +32,7 @@
         </div>
         <div class="wrapper">
             <h1 class="title">Welcome To <span id="word">CopArcadia!</span></h1>
-            <img src="TemplateData/girl.png" alt="hero" class="hero-img">
+            <img src="TemplateData/anime-boy3.png" alt="hero" class="hero-img">
 
             <div class="loader">
                 <div class="box"></div>
@@ -61,33 +61,19 @@
 
         // Основная анимация для прелоадера
         tloader
-            .set('.wrapper', { opacity: 0 }) // Прелоадер также скрыт
+            .set('.wrapper', { opacity: 0 }) // Прелоадер скрыт по умолчанию
             .to('.wrapper', { opacity: 1, duration: 0.5 }) // Плавное появление прелоадера
             .to('.preloader__bar', {
                 height: '110vh', // Появление полосок прелоадера
                 duration: 0.5,
                 stagger: 0.2
-            })
-            .to('.wrapper', { opacity: 0 })
-            .to('.preloader__bar', {
-                height: '110vh', // Убираем полоски прелоадера вверх
-                duration: 1,
-                stagger: 0.05,
-                borderBottomLeftRadius: 250,
-                borderBottomRightRadius: 250,
-                opacity: 0
-            })
-            .call(() => {
-                // После завершения анимации полосок, запускаем появление канваса
-                gsap.to('#unity-container', { opacity: 1, duration: 1.5 });
-                preloader.style.display = 'none'
             });
 
-
-        // Функция для загрузки Unity и плавного появления канваса
+        // Функция для загрузки Unity
         function startUnityLoading() {
             var container = document.querySelector("#unity-container");
             var canvas = document.querySelector("#unity-canvas");
+            var preloader = document.querySelector(".preloader");
             container.style.opacity = '0';
 
             var buildUrl = "Build";
@@ -102,18 +88,6 @@
                 productVersion: "1.0",
             };
 
-            if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-                var meta = document.createElement('meta');
-                meta.name = 'viewport';
-                meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-                document.getElementsByTagName('head')[0].appendChild(meta);
-                container.className = "unity-mobile";
-                canvas.className = "unity-mobile";
-            } else {
-                canvas.style.width = "100%";
-                canvas.style.height = "100%";
-            }
-
             // Загружаем Unity WebGL
             var script = document.createElement("script");
             script.src = loaderUrl;
@@ -121,14 +95,36 @@
                 createUnityInstance(canvas, config, (progress) => {
                     console.log(`Progress: ${progress * 100}%`);
                 }).then((unityInstance) => {
-                    // Прелоадер скроется после загрузки Unity, как только канвас будет полностью видим
+                    // Скрываем wrapper перед началом анимации preloader__bar
+                    gsap.to('.wrapper', {
+                        opacity: 0,
+                        duration: 0.5,
+                        onComplete: () => {
+                            // Как только wrapper скрыт, запускаем оставшуюся анимацию полосок
+                            gsap.to('.preloader__bar', {
+                                height: '110vh', // Убираем полоски прелоадера вверх
+                                duration: 1,
+                                stagger: 0.05,
+                                borderBottomLeftRadius: 250,
+                                borderBottomRightRadius: 250,
+                                opacity: 0,
+                                onComplete: () => {
+                                    // После завершения анимации полосок, запускаем появление канваса
+                                    preloader.style.display = 'none';
+                                    gsap.to('#unity-container', { opacity: 1, duration: 1 });
+                                }
+                            });
+                        }
+                    });
                 }).catch((message) => {
                     alert(message);
                 });
             };
+
             document.body.appendChild(script);
         }
 
+        // Запуск загрузки Unity и анимации прелоадера
         startUnityLoading();
     </script>
 
